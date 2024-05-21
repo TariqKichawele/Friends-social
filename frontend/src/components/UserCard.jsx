@@ -1,0 +1,82 @@
+import { 
+    Avatar, 
+    Box, 
+    Card, 
+    CardHeader, 
+    Flex, 
+    Heading, 
+    useToast, 
+    Text, 
+    IconButton, 
+    CardBody 
+} from '@chakra-ui/react'
+import React from 'react'
+import { BASE_URL } from '../App';
+import { BiTrash } from 'react-icons/bi';
+import EditModal from './EditModal';
+
+const UserCard = ({ user, setUsers }) => {
+    const toast = useToast();
+
+    const handleDeleteUser = async () => {
+        try {
+            const res = await fetch(BASE_URL + "/friends/" + user.id, {
+                method: "DELETE"
+            });
+            const data = await res.json();
+            if(!res.ok) throw new Error(data.error);
+
+            setUsers((prevUsers) => prevUsers.filter((u) => u.id !== user.id));
+            toast({
+                status: 'success',
+                title: 'success',
+                description: 'Friend deleted successfully',
+                duration: 2000,
+                position: 'top'
+            });
+        } catch (error) {
+            toast({
+                title: "An Error Occured",
+                description: error.message,
+                status: "error",
+                duration: 4000,
+                isClosable: true,
+                position: "top"
+            })
+        }
+    }
+  return (
+    <Card>
+        <CardHeader>
+            <Flex gap={4}>
+                <Flex flex={1} gap={4} alignItems={'center'}>
+                    <Avatar src={user.imgUrl} />
+
+                    <Box>
+                        <Heading size={'sm'}>{user.name}</Heading>
+                        <Text>{user.role}</Text>
+                    </Box>
+                </Flex>
+
+                <Flex>
+                    <EditModal user={user} setUsers={setUsers}/>
+                    <IconButton 
+                        variant={'ghost'}
+                        colorScheme='red'
+                        size={'sm'}
+                        icon={<BiTrash size={20}/>}
+                        aria-label='See menu'
+                        onClick={handleDeleteUser}
+                    />
+                </Flex>
+            </Flex>
+        </CardHeader>
+
+        <CardBody>
+            <Text>{user.description}</Text>
+        </CardBody>
+    </Card>
+  )
+}
+
+export default UserCard
